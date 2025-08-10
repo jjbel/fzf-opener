@@ -1,33 +1,28 @@
+from subprocess import Popen, PIPE, run
 from sys import argv
-from pathlib import Path
-from subprocess import run
-import os
+from os.path import join
 
-def list_files_str(src):
-    out = ""
-    # https://stackoverflow.com/q/50948391
-    for root, dirs, files in os.walk(src):
-        for file in files:
-            # make the full path, then remove the prefix
-            # + 1 for dir separator
-            out += os.path.join(root, file)[len(src) + 1:] + '\n'
-    return out
+# TODO ensure no trailing slash for list.py
+base_path = argv[1].rstrip("/")
 
-src_dir = argv[1]
+p1 = Popen(["python", "list.py", base_path], stdout=PIPE, shell=True)
+p2 = Popen(["fzf"], stdin=p1.stdout, stdout=PIPE, shell=True)
 
-# https://stackoverflow.com/a/165662
-# no need to use .decode() since specified encoding
-found_path = run(['fzf'], capture_output=True, input=list_files_str(src_dir), encoding='UTF-8').stdout
+# Close p1's stdout in parent to allow fzf to receive EOF properly
+p1.stdout.close()
 
-if len(found_path) == 0:
-    print("failed")
-else:
-    found_path = os.path.join(src_dir, found_path)
+# Read selected result from fzf
+out, _ = p2.communicate()
 
-    # https://ss64.com/nt/start.html
-    # first arg: give a blank title
-    run(f'start "" "{found_path}"', shell=True)
+found_path = out.rstrip().decode()
 
-# TODO for history
-# make separate history file for each query
-# data_dir = Path(__file__).parent / 'data'
+
+if found_path == "":
+    exit(1)
+
+found_path = join(base_path, found_path)
+print(found_path)
+
+# https://ss64.com/nt/start.html
+# first arg: give a blank title
+# run(f'start "" "{found_path}"', shell=True)
