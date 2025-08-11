@@ -1,8 +1,12 @@
 from os import walk
 from os.path import join
 from sys import argv
+from pathlib import Path
 
 src = argv[1]
+history_path = Path(__file__).parent / "history.txt"
+
+print(history_path.read_text())
 
 for root, dirs, files in walk(src):
     for file in files:
