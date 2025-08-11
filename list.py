@@ -1,14 +1,15 @@
-import os
+from os import walk
+from os.path import join
 from sys import argv
 
 src = argv[1]
 
-for root, dirs, files in os.walk(src):
+for root, dirs, files in walk(src):
     for file in files:
         # make the full path, then remove the prefix
         # + 1 for dir separator
-        path = os.path.join(root, file)[len(src) + 1 :]
-        
+        path = join(root, file)[len(src) + 1 :]
+
         # TODO shell can't handle unicode characters when piping to fzf?
         # just list.py runs without errors
 
