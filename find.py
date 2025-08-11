@@ -1,9 +1,11 @@
 from subprocess import Popen, PIPE, run
 from sys import argv
-from os.path import join
+from pathlib import Path
 
 # TODO ensure no trailing slash for list.py
 base_path = argv[1].rstrip("/")
+
+finder_path = Path(__file__).parent / "find.py"
 
 p1 = Popen(["python", "list.py", base_path], stdout=PIPE, shell=True)
 p2 = Popen(["fzf"], stdin=p1.stdout, stdout=PIPE, shell=True)
@@ -18,11 +20,11 @@ found_path = out.rstrip().decode()
 
 
 if found_path == "":
-    exit(1)
+    exit()
 
-found_path = join(base_path, found_path)
+found_path = Path(base_path) / Path(found_path)
 print(found_path)
 
 # https://ss64.com/nt/start.html
 # first arg: give a blank title
-# run(f'start "" "{found_path}"', shell=True)
+run(f'start "" "{found_path}"', shell=True)
